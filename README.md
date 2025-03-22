@@ -5,30 +5,27 @@
 For this project, I have used historical prices of Bitcoin available on Kaggle.
 The link to the dataset is [here](https://www.kaggle.com/datasets/nisargchodavadiya/bitcoin-time-series-with-different-time-intervals). The first few columns of the dataset are shown below:
 
-```
-	Open	High	Low	Close	Adj Close	Volume
-Date									
-2020-01-01 00:00:00+00:00	7194.892090	7254.330566	7174.944336	7200.174316	7200.174316	1.856566e+10
-2020-01-02 00:00:00+00:00	7202.551270	7212.155273	6935.270020	6985.470215	6985.470215	2.080208e+10
-2020-01-03 00:00:00+00:00	6984.428711	7413.715332	6914.996094	7344.884277	7344.884277	2.811148e+10
-2020-01-04 00:00:00+00:00	7345.375488	7427.385742	7309.514160	7410.656738	7410.656738	1.844427e+10
-2020-01-05 00:00:00+00:00	7410.451660	7544.497070	7400.535645	7411.317383	7411.317383	1.972507e+10
-```
+| Date | Open | High | Low | Close | Adj Close | Volume |
+|------|------|------|-----|-------|-----------|--------|
+| 2020-01-01 | 7194.89 | 7254.33 | 7174.94 | 7200.17 | 7200.17 | 1.85E+10 |
+| 2020-01-02 | 7202.55 | 7212.15 | 6935.27 | 6985.47 | 6985.47 | 2.08E+10 |
+| 2020-01-03 | 6984.42 | 7413.71 | 6914.99 | 7344.88 | 7344.88 | 2.81E+10 |
+| 2020-01-04 | 7345.37 | 7427.38 | 7309.51 | 7410.65 | 7410.65 | 1.84E+10 |
+| 2020-01-05 | 7410.45 | 7544.49 | 7400.53 | 7411.31 | 7411.31 | 1.97E+10 |
 
 In our analysis, we will only be interested in the **"Adj Close"** column and build our model to predict the same.
 
 Since we'll primarily be using the ARIMA function from the `pmdarima` library, which directly supports datetime indices, we set the **Date** column as the index and drop other columns that we won’t be using.
 After doing so, our dataset looks like this:
 
-```
-		Adj Close
-Date	
-2020-01-01 00:00:00+00:00	7200.174316
-2020-01-02 00:00:00+00:00	6985.470215
-2020-01-03 00:00:00+00:00	7344.884277
-2020-01-04 00:00:00+00:00	7410.656738
-2020-01-05 00:00:00+00:00	7411.317383
-```
+| Date | Adj Close |
+|------|-----------|
+| 2020-01-01 | 7200.17 |
+| 2020-01-02 | 6985.47 |
+| 2020-01-03 | 7344.88 |
+| 2020-01-04 | 7410.65 |
+| 2020-01-05 | 7411.31 |
+
 
 ### 1.2 Data Preprocessing
 
@@ -57,13 +54,13 @@ We perform basic exploratory visualizations to understand the dataset.
 
 - First, we plot a **BoxPlot** of the "Adj Close" prices aggregated over **years**. The resulting boxplot is:
 
-  ![Boxplot Yearly](#)
+  ![Boxplot Yearly](Images/Boxplot_Adj_Close.png)
 
   This indicates that in **2020**, Bitcoin prices had relatively less fluctuation but experienced multiple outliers, suggesting the early stages of the upward trend seen in **2021**, where prices surged beyond **$10,000** to an average of **$45,000**.
 
 - Next, we plot a **BoxPlot** of "Adj Close" aggregated over **months for each year**:
 
-  ![Boxplot Monthly](#)
+  ![Boxplot Monthly](Images/Box_plot_Adj_close_Month.png.png)
 
   These boxplots reveal that the Bitcoin rally started around **October 2020** and peaked around **April 2021**.
 
@@ -72,7 +69,7 @@ We perform basic exploratory visualizations to understand the dataset.
   2. **Seasonal Fluctuation**
   3. **Random Movements** (Residuals)
   
-  ![Seasonal Decomposition](#)
+  ![Seasonal Decomposition](Images/Trend_Decompose.png)
 
 ## 3. Fitting an ARIMA Model
 
@@ -85,14 +82,14 @@ The **ARIMA (AutoRegressive Integrated Moving Average)** model has three key par
 Instead of manually selecting these parameters, we use the `auto_arima` function from `pmdarima` to find the optimal values.
 
 For our training dataset (up to September 2021), `auto_arima` selects the optimal parameters as:
-
+Images/Trend_Decompose.png
 ```
 (p, d, q) = (7, 1, 0)
 ```
 
 We then train an **ARIMA(7,1,0)** model and plot the predictions for **October 2021** (test set):
 
-  ![ARIMA Predictions](#)
+  ![ARIMA Predictions](Images/ArimaVsActual.png)
 
 This is our **baseline model**, against which we compare other models.
 
@@ -100,7 +97,7 @@ This is our **baseline model**, against which we compare other models.
 
 An **expanding window** approach is used, where each new test value is included in the training set before predicting the next value. This approach significantly improves the model’s accuracy.
 
-  ![Expanding Window ARIMA](#)
+  ![Expanding Window ARIMA](Images/RollingArimaVsActual.png)
 
 However, this method **relies on actual test values** from the current period to predict the next period, which may not work well for **long-term forecasting**.
 
@@ -114,7 +111,7 @@ However, this method **relies on actual test values** from the current period to
 
 We then compare the **ARIMA baseline model**, **Expanding Window ARIMA**, and **XGBoost** predictions:
 
-  ![Model Comparison](#)
+  ![Model Comparison](Images/ArimaVsXGBoostVsActual.png)
 
 ### **Findings:**
 - **XGBoost performs slightly better** than the baseline ARIMA model.
